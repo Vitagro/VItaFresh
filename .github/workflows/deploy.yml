@@ -1,0 +1,95 @@
+name: Deploy Shop to Hostinger
+
+# Runs on every push to main that touches site-vitrine/ — that folder IS the
+# live Shop (a static, self-contained HTML site; see site-vitrine/README.md).
+# The Next.js app at the repo root is a future rewrite, not yet cut over.
+#
+# Ships the static files to Hostinger over SSH, swaps them into place
+# atomically, and rolls back automatically if the post-deploy health check
+# fails. No build step needed — it's plain HTML/CSS/JS.
+on:
+  push:
+    branches: [main]
+    paths: ["site-vitrine/**"]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-shop
+  cancel-in-progress: false
+
+env:
+  REMOTE_APP_DIR: /home/u387018932/domains/vita-agro.com/public_html/shop
+  REMOTE_RELEASE_DIR: /home/u387018932/domains/vita-agro.com/public_html/shop-releases/${{ github.sha }}
+  REMOTE_BACKUP_DIR: /home/u387018932/domains/vita-agro.com/public_html/shop-prev
+  SITE_URL: https://shop.vita-agro.com
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package artifacts
+        run: |
+          cd site-vitrine
+          tar -czf ../shop-deploy.tar.gz .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shop-build
+          path: shop-deploy.tar.gz
+          retention-days: 3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: shop-build
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          for i in 1 2 3 4 5; do
+            ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null && break
+            echo "ssh-keyscan attempt $i failed, retrying..."
+            sleep 5
+          done
+
+      - name: Upload new release (does not touch the live app yet)
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+          $SSH "mkdir -p '${{ env.REMOTE_RELEASE_DIR }}'"
+          scp -i ~/.ssh/deploy_key -P "${{ secrets.SSH_PORT }}" shop-deploy.tar.gz \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.REMOTE_RELEASE_DIR }}/shop-deploy.tar.gz"
+          $SSH "tar -xzf '${{ env.REMOTE_RELEASE_DIR }}/shop-deploy.tar.gz' -C '${{ env.REMOTE_RELEASE_DIR }}' && rm '${{ env.REMOTE_RELEASE_DIR }}/shop-deploy.tar.gz'"
+
+      - name: Swap into place (backup current release first)
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+          $SSH "rm -rf '${{ env.REMOTE_BACKUP_DIR }}' && mv '${{ env.REMOTE_APP_DIR }}' '${{ env.REMOTE_BACKUP_DIR }}' && mv '${{ env.REMOTE_RELEASE_DIR }}' '${{ env.REMOTE_APP_DIR }}'"
+
+      - name: Health check
+        id: health
+        run: |
+          sleep 5
+          code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 20 "${{ env.SITE_URL }}")
+          echo "http_code=$code"
+          if [ "$code" != "200" ]; then
+            echo "unhealthy=true" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Rollback on failed health check
+        if: failure() && steps.health.outputs.unhealthy == 'true'
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+          $SSH "rm -rf '${{ env.REMOTE_APP_DIR }}' && mv '${{ env.REMOTE_BACKUP_DIR }}' '${{ env.REMOTE_APP_DIR }}'"
+          echo "::error::Deploy failed health check — rolled back to previous release."
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

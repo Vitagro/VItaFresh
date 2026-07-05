@@ -1,0 +1,40 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": null,
+  "installCommand": null,
+  "outputDirectory": "site-vitrine",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://erp.vita-core.org/api/:path*" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options",  "value": "nosniff" },
+        { "key": "X-Frame-Options",          "value": "SAMEORIGIN" },
+        { "key": "X-XSS-Protection",         "value": "1; mode=block" },
+        { "key": "Referrer-Policy",          "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy",       "value": "camera=(), microphone=(), geolocation=(self), payment=()" },
+        { "key": "X-DNS-Prefetch-Control",   "value": "on" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
+        { "key": "Content-Security-Policy",  "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://erp.vita-core.org; frame-src https://www.youtube.com https://player.vimeo.com https://www.google.com https://drive.google.com; form-action 'self'; base-uri 'self'; object-src 'none'" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" },
+        { "key": "Content-Type",  "value": "application/xml; charset=utf-8" }
+      ]
+    }
+  ],
+  "redirects": [
+    { "source": "/home", "destination": "/", "permanent": true },
+    { "source": "/index.html", "destination": "/", "permanent": true }
+  ]
+}

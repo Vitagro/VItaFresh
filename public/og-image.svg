@@ -1,0 +1,207 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Fond gradient vert sombre -->
+    <radialGradient id="bg" cx="30%" cy="40%" r="80%">
+      <stop offset="0%"   stop-color="#1E5631"/>
+      <stop offset="60%"  stop-color="#0D2F1A"/>
+      <stop offset="100%" stop-color="#060C07"/>
+    </radialGradient>
+    <!-- Halo doré droite -->
+    <radialGradient id="haloGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#B8960C" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#B8960C" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Halo vert gauche -->
+    <radialGradient id="haloGreen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#4ade80" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Filtre flou orbs -->
+    <filter id="blur"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="blurSm"><feGaussianBlur stdDeviation="16"/></filter>
+    <!-- Gradient texte titre -->
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8e3"/>
+    </linearGradient>
+    <!-- Gradient accent doré -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#D4A843"/>
+      <stop offset="100%" stop-color="#B8960C"/>
+    </linearGradient>
+    <!-- Gradient bouton -->
+    <linearGradient id="btnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#B8960C"/>
+      <stop offset="100%" stop-color="#D4A843"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ═══ FOND ═══ -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Orb halo doré (droite) -->
+  <ellipse cx="950" cy="200" rx="380" ry="320" fill="url(#haloGold)" filter="url(#blur)"/>
+  <!-- Orb halo vert (bas gauche) -->
+  <ellipse cx="200" cy="500" rx="300" ry="240" fill="url(#haloGreen)" filter="url(#blur)"/>
+
+  <!-- Grain texture subtil -->
+  <rect width="1200" height="630" fill="url(#bg)" opacity="0.05"/>
+
+  <!-- ═══ LIGNE DÉCORATIVE GAUCHE ═══ -->
+  <rect x="0" y="0" width="5" height="630" fill="url(#goldGrad)"/>
+
+  <!-- ═══ LOGO MARK (cercle + V + feuille) ═══ -->
+  <!-- Fond cercle logo -->
+  <circle cx="118" cy="130" r="72" fill="#1A4D2E" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  <!-- Cercle border blanc -->
+  <circle cx="118" cy="130" r="62" fill="none" stroke="white" stroke-width="3.5"/>
+  <!-- Forme V -->
+  <path d="M88 100 L118 158 L148 100" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Feuille -->
+  <path d="M126 90 C138 72, 162 68, 174 76 C165 94, 142 98, 126 90 Z" fill="#4ade80"/>
+  <path d="M132 88 C143 80, 158 77, 170 78" stroke="#1a4d2e" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+
+  <!-- ═══ NOM DE MARQUE ═══ -->
+  <!-- VITA FRESH -->
+  <text x="210" y="122"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-size="58" font-weight="900" letter-spacing="6"
+    fill="white">VITA FRESH</text>
+  <!-- Tagline marque -->
+  <text x="213" y="158"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="17" font-weight="400" letter-spacing="2.5"
+    fill="rgba(255,255,255,0.65)">Fruits  ·  Légumes  ·  Herbes fraîches</text>
+
+  <!-- Séparateur horizontal -->
+  <rect x="60" y="195" width="500" height="1" fill="rgba(255,255,255,0.12)"/>
+
+  <!-- ═══ HEADLINE PRINCIPAL ═══ -->
+  <text x="60" y="295"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="68" font-weight="700" letter-spacing="-1"
+    fill="url(#titleGrad)">Fruits &amp; Légumes</text>
+  <!-- Mot accent doré -->
+  <text x="60" y="375"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="68" font-weight="700" letter-spacing="-1"
+    fill="url(#goldGrad)">Ultra Frais</text>
+  <text x="390" y="375"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="68" font-weight="700" letter-spacing="-1"
+    fill="url(#titleGrad)"> à Casablanca</text>
+
+  <!-- Sous-titre -->
+  <text x="62" y="430"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="24" font-weight="400" letter-spacing="0.5"
+    fill="rgba(255,255,255,0.70)">Livraison express 2h ou standard 24h — Du producteur à votre porte</text>
+
+  <!-- ═══ STATS BAR ═══ -->
+  <!-- Fond stats -->
+  <rect x="60" y="475" width="680" height="80" rx="14"
+    fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+
+  <!-- Stat 1 -->
+  <text x="130" y="510" text-anchor="middle"
+    font-family="'Arial Black', Arial, sans-serif"
+    font-size="28" font-weight="900" fill="url(#goldGrad)">500+</text>
+  <text x="130" y="534" text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="13" fill="rgba(255,255,255,0.55)">Clients actifs</text>
+
+  <!-- Séparateur -->
+  <rect x="225" y="490" width="1" height="40" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Stat 2 -->
+  <text x="315" y="510" text-anchor="middle"
+    font-family="'Arial Black', Arial, sans-serif"
+    font-size="28" font-weight="900" fill="url(#goldGrad)">98%</text>
+  <text x="315" y="534" text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="13" fill="rgba(255,255,255,0.55)">Satisfaction</text>
+
+  <!-- Séparateur -->
+  <rect x="408" y="490" width="1" height="40" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Stat 3 -->
+  <text x="500" y="510" text-anchor="middle"
+    font-family="'Arial Black', Arial, sans-serif"
+    font-size="28" font-weight="900" fill="#4ade80">24h</text>
+  <text x="500" y="534" text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="13" fill="rgba(255,255,255,0.55)">Livraison standard</text>
+
+  <!-- Séparateur -->
+  <rect x="592" y="490" width="1" height="40" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Stat 4 -->
+  <text x="670" y="510" text-anchor="middle"
+    font-family="'Arial Black', Arial, sans-serif"
+    font-size="28" font-weight="900" fill="url(#goldGrad)">6</text>
+  <text x="670" y="534" text-anchor="middle"
+    font-family="Arial, sans-serif"
+    font-size="13" fill="rgba(255,255,255,0.55)">Zones livrées</text>
+
+  <!-- ═══ ÉLÉMENTS DÉCORATIFS DROITE — Fruits ═══ -->
+  <!-- Cercle décoratif grand -->
+  <circle cx="1010" cy="315" r="220"
+    fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <circle cx="1010" cy="315" r="175"
+    fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+
+  <!-- Fruit card 1 — Orange -->
+  <rect x="850" y="80" width="160" height="160" rx="20"
+    fill="rgba(255,255,255,0.07)" stroke="rgba(184,150,12,0.25)" stroke-width="1.5"/>
+  <text x="930" y="160" text-anchor="middle" font-size="72">🍊</text>
+  <text x="930" y="218" text-anchor="middle"
+    font-family="Arial, sans-serif" font-size="14" font-weight="600"
+    fill="rgba(255,255,255,0.75)">Orange à Jus</text>
+  <text x="930" y="238" text-anchor="middle"
+    font-family="Arial, sans-serif" font-size="13" font-weight="700"
+    fill="url(#goldGrad)">5,30 MAD/kg</text>
+
+  <!-- Fruit card 2 — Ananas -->
+  <rect x="1030" y="110" width="155" height="155" rx="20"
+    fill="rgba(255,255,255,0.07)" stroke="rgba(184,150,12,0.25)" stroke-width="1.5"/>
+  <text x="1107" y="186" text-anchor="middle" font-size="68">🍍</text>
+  <text x="1107" y="241" text-anchor="middle"
+    font-family="Arial, sans-serif" font-size="14" font-weight="600"
+    fill="rgba(255,255,255,0.75)">Ananas</text>
+  <text x="1107" y="261" text-anchor="middle"
+    font-family="Arial, sans-serif" font-size="13" font-weight="700"
+    fill="url(#goldGrad)">21,40 MAD/kg</text>
+
+  <!-- Fruit card 3 — Kiwi -->
+  <rect x="870" y="300" width="145" height="145" rx="20"
+    fill="rgba(255,255,255,0.07)" stroke="rgba(74,222,128,0.2)" stroke-width="1.5"/>
+  <text x="942" y="370" text-anchor="middle" font-size="62">🥝</text>
+  <text x="942" y="420" text-anchor="middle"
+    font-family="Arial, sans-serif" font-size="13" font-weight="600"
+    fill="rgba(255,255,255,0.75)">Kiwi Sun Gold</text>
+
+  <!-- Fruit card 4 — Légumes -->
+  <rect x="1035" y="310" width="145" height="145" rx="20"
+    fill="rgba(255,255,255,0.07)" stroke="rgba(74,222,128,0.2)" stroke-width="1.5"/>
+  <text x="1107" y="380" text-anchor="middle" font-size="62">🥦</text>
+  <text x="1107" y="430" text-anchor="middle"
+    font-family="Arial, sans-serif" font-size="13" font-weight="600"
+    fill="rgba(255,255,255,0.75)">Légumes Frais</text>
+
+  <!-- Badge "Livraison Express" -->
+  <rect x="880" y="495" width="290" height="50" rx="25"
+    fill="url(#btnGrad)"/>
+  <text x="1025" y="527" text-anchor="middle"
+    font-family="'Arial Black', Arial, sans-serif"
+    font-size="16" font-weight="900" letter-spacing="0.5"
+    fill="#060C07">🚀 LIVRAISON EXPRESS 2H</text>
+
+  <!-- ═══ URL SITE ═══ -->
+  <text x="600" y="610" text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="16" letter-spacing="1.5"
+    fill="rgba(255,255,255,0.35)">vitafresh.vercel.app  ·  +212 681 73 69 10</text>
+
+  <!-- Ligne bottom -->
+  <rect x="0" y="625" width="1200" height="5" fill="url(#goldGrad)"/>
+</svg>

@@ -1,0 +1,12 @@
+{
+  "name": "Vita Fresh",
+  "short_name": "Vita Fresh",
+  "description": "Fruits & légumes frais à Casablanca",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a4d2e",
+  "icons": [
+    { "src": "/og-image.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
