@@ -3017,11 +3017,18 @@ body.anim-paused *,body.anim-paused *::before,body.anim-paused *::after{animatio
     <p style="font-size:13px;color:#888;margin-bottom:18px">Pas encore de compte ? Faites une demande en bas de page ou contactez-nous sur WhatsApp.</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
       <button id="pro-app-link-btn" onclick="showProAppLink()" style="background:linear-gradient(135deg,#1a7a3c,#25a352);color:#fff;padding:11px 22px;border-radius:30px;font-weight:700;font-size:14px;border:none;cursor:pointer">🚀 Accéder à l'application</button>
+      <button onclick="showApkDownload()" style="background:none;color:#1a7a3c;padding:11px 22px;border-radius:30px;font-weight:700;font-size:14px;border:2px solid #1a7a3c;cursor:pointer">📲 Télécharger l'APK Android</button>
       <button onclick="document.getElementById('pro-app-msg-modal').style.display='none'" style="background:none;border:2px solid #ddd;color:#666;padding:11px 22px;border-radius:30px;font-size:14px;cursor:pointer">Fermer</button>
     </div>
     <div id="pro-app-link-reveal" style="display:none;margin-top:14px;padding:12px;background:#fffbe6;border-radius:10px;font-size:13px;color:#555">
       🔗 <a href="https://erp.vita-agro.com/" target="_blank" style="color:#1a7a3c;font-weight:700">erp.vita-agro.com</a><br>
       <span style="font-size:12px;color:#999">Ouvrez ce lien sur votre navigateur ou via l'app mobile.</span>
+    </div>
+    <div id="apk-download-reveal" style="display:none;margin-top:14px;padding:16px;background:#f0faf4;border-radius:12px;font-size:13px;color:#555;text-align:center">
+      <div id="apk-qr-box" style="display:inline-block;padding:10px;background:#fff;border-radius:10px;line-height:0"></div>
+      <p style="margin:10px 0 4px;font-weight:700;color:#1a7a3c">Scannez avec votre téléphone Android</p>
+      <p style="font-size:12px;color:#999;margin-bottom:10px">ou <a id="apk-direct-link" href="#" target="_blank" style="color:#1a7a3c;font-weight:700">téléchargez directement le fichier .apk</a></p>
+      <p style="font-size:11px;color:#999">Android peut afficher "Source inconnue" — autorisez l'installation depuis le navigateur pour continuer.</p>
     </div>
   </div>
 </div>
@@ -7570,6 +7577,37 @@ window.activeCategory=activeCategory;
   }
   if(document.readyState==="complete"||document.readyState==="interactive") setTimeout(init,1200);
   else window.addEventListener("DOMContentLoaded",function(){setTimeout(init,1200);});
+})();
+</script>
+
+<!-- ===== Téléchargement APK FreshLink Pro — protégé par mot de passe ===== -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script>
+(function(){
+  // Mot de passe partagé, communiqué au cas par cas par l'équipe Vita Agro —
+  // changer cette valeur ici suffit à le faire tourner (pas de backend).
+  var APK_PASS = "vita@2026";
+  var APK_URL = "https://github.com/JawadVita/FreshLink-Mobile/releases/latest/download/FreshLinkPro.apk";
+
+  window.showApkDownload = function(){
+    var p = prompt("Mot de passe requis pour télécharger l'APK :");
+    if (p === null) return;
+    if (p !== APK_PASS) { alert("Mot de passe incorrect."); return; }
+    var box = document.getElementById("apk-qr-box");
+    if (box && !box.dataset.built) {
+      try {
+        var qr = qrcode(0, "M");
+        qr.addData(APK_URL);
+        qr.make();
+        box.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 4 });
+        box.dataset.built = "1";
+      } catch (e) { box.innerHTML = "<p style='color:#c0392b;font-size:12px'>QR indisponible — utilisez le lien ci-dessous.</p>"; }
+    }
+    var link = document.getElementById("apk-direct-link");
+    if (link) link.href = APK_URL;
+    var reveal = document.getElementById("apk-download-reveal");
+    if (reveal) reveal.style.display = "block";
+  };
 })();
 </script>
 </body>
