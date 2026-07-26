@@ -50,9 +50,8 @@ jobs:
 
       - name: Set up SSH
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
           for i in 1 2 3 4 5; do
             ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null && break
             echo "ssh-keyscan attempt $i failed, retrying..."
@@ -60,16 +59,20 @@ jobs:
           done
 
       - name: Upload new release (does not touch the live app yet)
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
-          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+          SSH="sshpass -e ssh -o ConnectTimeout=15 -o ConnectionAttempts=10 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
           $SSH "mkdir -p '${{ env.REMOTE_RELEASE_DIR }}'"
-          scp -i ~/.ssh/deploy_key -P "${{ secrets.SSH_PORT }}" shop-deploy.tar.gz \
+          sshpass -e scp -o ConnectTimeout=15 -o ConnectionAttempts=10 -P "${{ secrets.SSH_PORT }}" shop-deploy.tar.gz \
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.REMOTE_RELEASE_DIR }}/shop-deploy.tar.gz"
           $SSH "tar -xzf '${{ env.REMOTE_RELEASE_DIR }}/shop-deploy.tar.gz' -C '${{ env.REMOTE_RELEASE_DIR }}' && rm '${{ env.REMOTE_RELEASE_DIR }}/shop-deploy.tar.gz'"
 
       - name: Swap into place (backup current release first)
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
-          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+          SSH="sshpass -e ssh -o ConnectTimeout=15 -o ConnectionAttempts=10 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
           $SSH "rm -rf '${{ env.REMOTE_BACKUP_DIR }}' && mv '${{ env.REMOTE_APP_DIR }}' '${{ env.REMOTE_BACKUP_DIR }}' && mv '${{ env.REMOTE_RELEASE_DIR }}' '${{ env.REMOTE_APP_DIR }}'"
 
       - name: Health check
@@ -85,11 +88,9 @@ jobs:
 
       - name: Rollback on failed health check
         if: failure() && steps.health.outputs.unhealthy == 'true'
+        env:
+          SSHPASS: ${{ secrets.SSH_PASSWORD }}
         run: |
-          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
+          SSH="sshpass -e ssh -o ConnectTimeout=15 -o ConnectionAttempts=10 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}"
           $SSH "rm -rf '${{ env.REMOTE_APP_DIR }}' && mv '${{ env.REMOTE_BACKUP_DIR }}' '${{ env.REMOTE_APP_DIR }}'"
           echo "::error::Deploy failed health check — rolled back to previous release."
-
-      - name: Clean up SSH key
-        if: always()
-        run: rm -f ~/.ssh/deploy_key
