@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700"], variable: "--font-arabic", display: "swap" })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://shop.vita-core.org"),
+  metadataBase: new URL("https://shop.vita-agro.com"),
   title: {
     default: "Vita Fresh — Fruits & légumes frais à Casablanca",
     template: "%s · Vita Fresh",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description: "Fruits & légumes frais, livraison 24h. CHR, hôtels, restaurants.",
     images: ["/og-image.svg"],
   },
-  alternates: { canonical: "https://shop.vita-core.org" },
+  alternates: { canonical: "https://shop.vita-agro.com" },
   robots: { index: true, follow: true },
   manifest: "/manifest.webmanifest",
 }

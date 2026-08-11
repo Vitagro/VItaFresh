@@ -4,7 +4,7 @@
 
 import type { Product, AccountSession, OrderPayload } from "./types"
 
-const ERP_API = process.env.NEXT_PUBLIC_API_URL ?? "https://erp.vita-core.org"
+const ERP_API = process.env.NEXT_PUBLIC_API_URL ?? "https://erp.vita-agro.com"
 const BASE = typeof window === "undefined" ? ERP_API : ""
 
 async function getJson<T>(path: string, opts: RequestInit = {}): Promise<T> {

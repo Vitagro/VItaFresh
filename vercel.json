@@ -5,7 +5,7 @@
   "installCommand": null,
   "outputDirectory": "site-vitrine",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://erp.vita-core.org/api/:path*" }
+    { "source": "/api/:path*", "destination": "https://erp.vita-agro.com/api/:path*" }
   ],
   "headers": [
     {
@@ -18,7 +18,7 @@
         { "key": "Permissions-Policy",       "value": "camera=(), microphone=(), geolocation=(self), payment=()" },
         { "key": "X-DNS-Prefetch-Control",   "value": "on" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
-        { "key": "Content-Security-Policy",  "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://erp.vita-core.org; frame-src https://www.youtube.com https://player.vimeo.com https://www.google.com https://drive.google.com; form-action 'self'; base-uri 'self'; object-src 'none'" }
+        { "key": "Content-Security-Policy",  "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://erp.vita-agro.com; frame-src https://www.youtube.com https://player.vimeo.com https://www.google.com https://drive.google.com; form-action 'self'; base-uri 'self'; object-src 'none'" }
       ]
     },
     {

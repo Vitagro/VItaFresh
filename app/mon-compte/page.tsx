@@ -67,7 +67,7 @@ export default function MonComptePage() {
             <p className="font-bold text-brand">Vous êtes un professionnel — accédez à votre espace pro</p>
             <p className="text-sm text-brand-dark/70">Tarifs CHR, factures, wallet, parrainage…</p>
           </div>
-          <a href="https://erp.vita-core.org" className="btn-primary">Ouvrir l'espace pro →</a>
+          <a href="https://erp.vita-agro.com" className="btn-primary">Ouvrir l'espace pro →</a>
         </div>
       )}
 

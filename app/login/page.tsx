@@ -82,7 +82,7 @@ export default function LoginPage() {
 
       <p className="mt-6 text-center text-xs text-slate-400">
         Vous êtes un membre de l'équipe ?{" "}
-        <a href="https://erp.vita-core.org" className="font-semibold text-brand hover:underline">Accédez à l'ERP →</a>
+        <a href="https://erp.vita-agro.com" className="font-semibold text-brand hover:underline">Accédez à l'ERP →</a>
       </p>
     </div>
   )

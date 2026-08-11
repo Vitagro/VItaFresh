@@ -29,7 +29,7 @@ export default function Footer() {
           <FooterCol title="Contact" links={[
             { href: "mailto:contact@vita-core.org", label: "contact@vita-core.org" },
             { href: "tel:+212600000000", label: "+212 6 00 00 00 00" },
-            { href: "https://erp.vita-core.org", label: "Espace ERP →", external: true },
+            { href: "https://erp.vita-agro.com", label: "Espace ERP →", external: true },
           ]} />
         </div>
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 md:flex-row">
