@@ -4095,7 +4095,10 @@ function renderProds(f){
 
 function updateCatCounts(){
   var counts={tous:0,fruits:0,legumes:0,herbes:0,transformes:0,autres:0};
-  PRODS.forEach(function(p){ if(p.dispo){counts.tous++;if(counts[p.cat]!==undefined)counts[p.cat]++;} });
+  // Compte TOUS les articles affichés dans la grille (renderProds ne filtre pas sur
+  // dispo — les articles en rupture restent visibles avec badge "Sur commande"),
+  // sinon les compteurs affichent 0 alors que des produits apparaissent bien en dessous.
+  PRODS.forEach(function(p){ counts.tous++;if(counts[p.cat]!==undefined)counts[p.cat]++; });
   ["tous","fruits","legumes","herbes","transformes","autres"].forEach(function(k){
     var el=document.getElementById("cat-count-"+k);
     if(el) el.textContent=counts[k]+" produit"+(counts[k]>1?"s":"");
