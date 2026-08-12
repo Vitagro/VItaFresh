@@ -4080,7 +4080,7 @@ function renderProds(f){
       demandNoteHtml='<div style="font-size:10.5px;color:#64748b;background:transparent;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;padding:6px 0;margin:5px 0 6px;line-height:1.5;letter-spacing:.1px">Préparation '+titre.toLowerCase()+' confirmée à la commande</div>';
     }
     // Nom arabe affiché en dessous du nom français (police Noto Sans Arabic, dir rtl)
-    var arHtml = p.no ? '<div class="pc-n-ar" style="font-family:\'Noto Sans Arabic\',\'Amiri\',\'Cairo\',sans-serif;font-size:13px;color:#64748b;direction:rtl;text-align:right;font-weight:600;margin-top:-2px;margin-bottom:3px;letter-spacing:0">'+p.no+'</div>' : '';
+    var arHtml = p.no ? '<div class="pc-n-ar" style="font-family:\'Noto Sans Arabic\',\'Amiri\',\'Cairo\',sans-serif;font-size:16px;color:#64748b;direction:rtl;text-align:right;font-weight:600;margin-top:-2px;margin-bottom:3px;letter-spacing:0">'+p.no+'</div>' : '';
 
     // Badges préparations disponibles (épluché/lavé/coupé/etc.) — affichés si tag présent
     var PREP_LABELS={epluche:"🔪 Épluché",lave:"💧 Lavé",coupe:"🔪 Coupé",pret_cuisson:"🍳 Prêt cuisson",emballe:"📦 Emballé"};
