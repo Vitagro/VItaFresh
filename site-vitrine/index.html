@@ -4014,7 +4014,7 @@ function renderProds(f){
   var specTags=["frais","epluche","lave","combo","promo"];
   var list;
   onDemandMode = "";
-  if(filter==="tous"||!filter||filter==="frais"){
+  if(filter==="tous"||filter==="all"||!filter||filter==="frais"){
     // Tous les articles autorisés par l'ERP
     list=PRODS.slice();
   }
