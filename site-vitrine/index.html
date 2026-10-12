@@ -4340,6 +4340,7 @@ function submitOrder(){
   if(wa2) wa2.href="https://wa.me/"+CONFIG.WA_EQUIPE_2+"?text="+encodeURIComponent(msgFull);
 
   function onSuccess(num){
+    try { sessionStorage.removeItem("vf_checkout_attempt"); } catch(_){}
     // 1. Restaurer le bouton EN PREMIER (avant updateCartUI) pour que total-btn soit dans le DOM
     btn.disabled=false; btn.innerHTML="🔍 Vérifier ma commande — <span id='total-btn'>0 MAD</span>";
     // 1b. Le bouton du modal de confirmation (autre id) doit aussi être réarmé —
@@ -4399,19 +4400,34 @@ function submitOrder(){
     source:"site_web"
   };
 
+  // Reuse the same reference when retrying an unchanged checkout.
+  var checkoutSignature=JSON.stringify(orderData);
+  var previousAttempt=null;
+  try { previousAttempt=JSON.parse(sessionStorage.getItem("vf_checkout_attempt")||"null"); } catch(_){}
+  var checkoutKey=previousAttempt&&previousAttempt.signature===checkoutSignature
+    ?previousAttempt.key:crypto.randomUUID();
+  orderData.idempotencyKey=checkoutKey;
+  try { sessionStorage.setItem("vf_checkout_attempt",JSON.stringify({signature:checkoutSignature,key:checkoutKey})); } catch(_){}
+
   fetch(CONFIG.API_URL+"/api/ext/commandes",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(orderData)
   })
-  .then(function(r){return r.json();})
-  .then(function(d){ onSuccess(d.numero||cmdRef); })
+  .then(async function(r){
+    var d=await r.json();
+    if(!r.ok || !d.numero) throw new Error(d.error||"La commande n'a pas été enregistrée.");
+    return d;
+  })
+  .then(function(d){ onSuccess(d.numero); })
   .catch(function(err){
-    console.warn("[commandes] ERP unreachable:",err);
-    // Fallback Supabase direct si disponible
-    if(sb){
-      sb.from("fl_commandes_web").insert([Object.assign({},orderData,{numero:cmdRef})]).then(function(){onSuccess(cmdRef);}).catch(function(){onSuccess(cmdRef);});
-    } else { onSuccess(cmdRef); }
+    console.warn("[commandes] Enregistrement non confirmé");
+    btn.disabled=false;
+    btn.innerHTML="🔍 Vérifier ma commande — <span id='total-btn'></span>";
+    var confirmBtn=document.getElementById("oc-confirm-btn");
+    if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent="Réessayer l'envoi";}
+    updateCartUI();
+    showToast("⚠️ "+(err.message||"Connexion impossible. Votre panier est conservé."));
   });
 }
 
