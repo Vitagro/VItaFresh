@@ -4078,6 +4078,7 @@ function renderProds(f){
     var tagType=p.t||(p.tags&&p.tags[0])||"frais", tagClass=TC[tagType]||"tf", tagLabel=TL[tagType]||"🌿 Frais";
     var promoHtml=p.promo&&p.promoLabel?'<span class="pc-promo">'+p.promoLabel+'</span>':"";
     var prixHtml=p.promo&&p.prixBase&&p.prixBase!==p.p?p.p+' MAD <del>'+p.prixBase+'</del><span>/ '+p.u+'</span>':p.p+' MAD <span>/ '+p.u+'</span>';
+    if(!hasCataloguePrice(p)) prixHtml='Prix sur demande';
     var imgHtml=p.img?'<img src="'+p.img+'" alt="'+p.n+'" onerror="this.style.display=\'none\'" loading="lazy">':'';
     var tagsHtml=(p.tags||[]).map(function(tg){return TL[tg]?'<span class="po">'+TL[tg]+'</span>':'';}).join("");
     var unitBadge='<span style="display:inline-block;background:#f0fdf4;color:#1e5631;border:1px solid #d1fae5;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;margin-bottom:4px">⚖️ '+p.u+'</span>';
@@ -4107,6 +4108,7 @@ function renderProds(f){
     // Tous les articles RESTENT commandables (frais, épluché, lavé, coupé) — même en
     // rupture (« sur commande »). Petit tag d'angle « Sur commande » via outBadgeHtml.
     var qcHtml='<div class="qc"><button class="qb" onclick="upCart(\''+p.id+'\',-1)">−</button><span class="qv" id="q'+p.id+'">'+qty+'</span><button class="qb" onclick="upCart(\''+p.id+'\',1)"'+(outStock?' title="Sur commande — confirmé par l\'équipe"':'')+(onDemandMode?' title="'+(onDemandMode==="epluche"?"Épluché":onDemandMode==="coupe"?"Coupé":"Lavé")+' sur demande"':'')+'>+</button></div>';
+    if(!hasCataloguePrice(p)) qcHtml='<a href="#contact" class="qb" style="width:auto;padding:6px 10px;font-size:12px;text-decoration:none" title="Contactez notre équipe pour le tarif">Demander le prix</a>';
     return'<div class="pc"><div class="pc-img"><span>'+p.em+'</span>'+imgHtml+'<span class="pc-tag '+tagClass+'">'+tagLabel+'</span>'+outBadgeHtml+demandBadgeHtml+'</div><div class="pc-body"><div class="pc-n">'+p.n+'</div>'+arHtml+'<div class="pc-ori">📍 '+p.o+'</div>'+prepBadgesHtml+'<div class="pc-opts">'+tagsHtml+promoHtml+'</div>'+unitBadge+packHtml+demandNoteHtml+outNoteHtml+stockHtml+'<div class="pc-foot"><div class="pc-p">'+prixHtml+'</div>'+qcHtml+'</div></div></div>';
   }).join("");
 }
@@ -4131,10 +4133,14 @@ function updateCatCounts(){
 //  Supabase + ERP API — fallback تلقائي إذا ما كانش الإنترنت
 // ██████████████████████████████████████████████████████████████████
 // ══════════════════════════════════════════════════════════════════
+function hasCataloguePrice(p){
+  return !!p && Number.isFinite(Number(p.p)) && Number(p.p)>0;
+}
 function upCart(id,d){
   var p=PRODS.find(function(x){return x.id===id||x.id===parseInt(id);});
   // Tous les articles sont commandables, même en rupture (« sur commande »)
   if(!p) return;
+  if(Number(d)>0 && !hasCataloguePrice(p)){showToast("ℹ️ Prix sur demande — contactez notre équipe");return;}
   if(!cart[id]) cart[id]=Object.assign({},p,{qty:0});
   cart[id].qty=Math.max(0,cart[id].qty+parseInt(d));
   if(!cart[id].qty) delete cart[id];
@@ -4292,6 +4298,7 @@ function submitOrder(){
   var nom=document.getElementById("f-nom").value.trim(), tel=document.getElementById("f-tel").value.trim(), adr=document.getElementById("f-adr").value.trim();
   if(!nom||!tel||!adr){showToast("⚠️ Remplissez nom, téléphone et adresse");return;}
   if(!Object.keys(cart).length){showToast("🛒 Panier vide — ajoutez des produits");return;}
+  if(Object.values(cart).some(function(p){return !hasCataloguePrice(p);})){showToast("ℹ️ Un article attend son tarif — contactez notre équipe avant de commander");return;}
   var btn=document.getElementById("submit-btn"); btn.disabled=true; btn.innerHTML="⏳ Envoi en cours... <span id='total-btn' style='display:none'>0</span>";
   var items=Object.values(cart), sub=items.reduce(function(s,p){return s+p.p*p.qty;},0);
   var df=delMode==="exp"?CFG.exp:(sub>=CFG.free?0:CFG.std);
@@ -5381,6 +5388,7 @@ function openOrderCheck(){
   var adr=document.getElementById("f-adr").value.trim();
   if(!nom||!tel){showToast("⚠️ Remplissez au minimum nom et téléphone");return;}
   if(!Object.keys(cart).length){showToast("🛒 Panier vide — ajoutez des produits");return;}
+  if(Object.values(cart).some(function(p){return !hasCataloguePrice(p);})){showToast("ℹ️ Un article attend son tarif — contactez notre équipe avant de commander");return;}
   // 🔧 Toujours réarmer le bouton de confirmation à l'ouverture : si une
   // tentative précédente avait laissé "⏳ Envoi en cours..." figé (le bouton
   // n'est jamais remis à jour par submitOrder, qui agit sur un autre bouton),
