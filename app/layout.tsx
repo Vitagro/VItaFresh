@@ -4,6 +4,7 @@ import { CartProvider } from "@/lib/cart"
 import { SessionProvider } from "@/lib/session"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
+import ShopAssistant from "@/components/ShopAssistant"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Header />
             <main className="min-h-[calc(100vh-4rem)]">{children}</main>
             <Footer />
+            <ShopAssistant />
           </CartProvider>
         </SessionProvider>
       </body>
