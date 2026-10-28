@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
 <meta charset="UTF-8"/>
@@ -741,7 +741,7 @@ html[dir="rtl"] .modal-close{right:auto;left:14px}
 /* CHAT WIDGET */
 #chat-fab{position:fixed;bottom:96px;right:28px;z-index:999;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;width:60px;height:60px;border-radius:50%;font-size:26px;cursor:pointer;box-shadow:0 6px 28px rgba(37,211,102,.55);transition:.3s;display:flex;align-items:center;justify-content:center;animation:wap 3s infinite}
 #chat-fab:hover{transform:scale(1.1)}
-#chat-panel{display:none;position:fixed;bottom:170px;right:20px;z-index:997;width:340px;max-height:520px;background:#fff;border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,.18);overflow:hidden;flex-direction:column}
+#chat-panel{display:none;position:fixed;bottom:170px;right:20px;z-index:997;width:340px;max-width:calc(100vw - 40px);max-height:70dvh;background:#fff;border-radius:18px;box-shadow:0 12px 48px rgba(0,0,0,.18);overflow:hidden;flex-direction:column}
 #chat-messages{flex:1;overflow-y:auto;padding:14px;background:#ECE5DD;min-height:200px;max-height:320px}
 #chat-panel.open{display:flex}
 .chat-header{background:linear-gradient(135deg,#075e54,#128c7e);padding:16px 18px;display:flex;align-items:center;gap:12px}
@@ -2965,7 +2965,7 @@ body.anim-paused *,body.anim-paused *::before,body.anim-paused *::after{animatio
   </div>
   <div class="chat-body" id="chat-messages"></div>
   <div id="chat-quickreplies-bar" class="chat-quickreplies" style="padding:8px 12px;background:#f7f7f7;border-top:1px solid #eee;gap:6px;flex-wrap:wrap;display:flex"></div>
-  <div class="chat-input-row">
+  <p style="padding:6px 12px;font-size:11px;background:white;color:#555">Votre demande est traitée par Groq. Ne saisissez pas de données personnelles.</p><div class="chat-input-row">
     <input class="chat-input" id="chat-input" placeholder="Tapez · اكتب · Type..." onkeydown="if(event.key==='Enter')chatSend()"/>
     <button class="chat-send-btn" onclick="event.stopPropagation();chatSend()" title="Envoyer">➤</button>
   </div>
@@ -6359,7 +6359,7 @@ function chatLang(){ return(typeof currentLang!=="undefined"&&currentLang)||"fr"
 function chatAddMsg(who, text){
   var body=document.getElementById("chat-messages"); if(!body) return;
   var div=document.createElement("div");
-  var html=text.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\n/g,"<br>");
+  var html=String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\n/g,"<br>");
   if(who==="bot"){
     div.style.cssText="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px";
     div.innerHTML='<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#075e54,#128c7e);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">✨</div><div class="chat-bubble" style="margin-bottom:0">'+html+'</div>';
@@ -6590,44 +6590,22 @@ function chatBuildReply(userText){
   }),qrs:[{label:"🛒 Catalogue",action:"catalogue"},{label:"🚚 Livraison",action:null,_q:"livraison"},{label:"💬 WhatsApp",action:"waDirect"}]};
 }
 
+var shopAiBusy=false;
 function chatAskAI(userText){
-  var bar=document.getElementById("chat-quickreplies-bar"); if(bar) bar.innerHTML="";
-  chatHistory.push({role:"user", content:userText});
+  if(shopAiBusy)return;
+  shopAiBusy=true;
   chatShowTyping();
-  // 1) Tente l'IA serveur (LLM avec contexte catalogue). 2) Fallback mots-clés.
-  var done=false;
-  var fallback=function(){
-    if(done) return; done=true;
-    chatRemoveTyping();
-    var r=chatBuildReply(userText);
-    chatHistory.push({role:"assistant", content:r.text});
-    chatAddMsg("bot", r.text);
-    chatShowQuickReplies(r.qrs||[{label:"🛒 Catalogue",action:"catalogue"},{label:"💬 WhatsApp",action:"waDirect"}]);
-  };
-  var timeout=setTimeout(fallback, 9000); // si l'IA tarde trop → fallback
-  fetch(CONFIG.API_URL+"/api/ext/chat",{
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ message:userText, history:chatHistory.slice(-8) })
-  }).then(function(res){ return res.ok?res.json():null; })
-    .then(function(d){
-      if(done) return;
-      if(d && d.reply){
-        clearTimeout(timeout); done=true;
-        chatRemoveTyping();
-        chatHistory.push({role:"assistant", content:d.reply});
-        // Rendu markdown léger (**gras**, retours ligne)
-        chatAddMsg("bot", d.reply);
-        chatShowQuickReplies([{label:"🛒 Catalogue",action:"catalogue"},{label:"💬 WhatsApp",action:"waDirect"}]);
-      } else {
-        clearTimeout(timeout); fallback();   // LLM non configuré (501) → mots-clés
-      }
-    })
-    .catch(function(){ clearTimeout(timeout); fallback(); });
+  fetch("/api/ext/shop-assistant",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:userText.slice(0,1000)}),signal:AbortSignal.timeout(35000)})
+  .then(async function(r){var d=await r.json();if(!r.ok)throw Error(d.error||"Assistant indisponible");return d;})
+  .then(function(d){
+    var lines=d.products.map(function(p){return p.nom+" — "+(p.prix==null?"Prix à confirmer":p.prix+" DH / "+p.unite)+" — "+(p.available?"Disponible au catalogue":"Disponibilité à confirmer");});
+    chatAddMsg("bot",d.intent!=="products"?"Pour la livraison ou le suivi, contactez notre équipe. Aucun délai n’est confirmé par l’assistant.":lines.length?"Voici une sélection du catalogue :\n\n"+lines.join("\n\n")+"\n\nVérifiez les quantités et le prix final dans le catalogue avant de commander.":"Aucun produit correspondant trouvé. Essayez un nom de produit ou consultez le catalogue.");
+  }).catch(function(e){chatAddMsg("bot",e.message||"Assistant indisponible. Consultez le catalogue.");})
+  .finally(function(){shopAiBusy=false;chatRemoveTyping();chatShowQuickReplies([{label:"Catalogue",action:"catalogue"},{label:"Contacter l’équipe",action:"waDirect"}]);});
 }
-
 function chatSend(){
   var input=document.getElementById("chat-input"), text=input.value.trim();
-  if(!text) return; input.value="";
+  if(!text||shopAiBusy) return; input.value="";
   chatAddMsg("user", text);
   chatAskAI(text);
 }
@@ -7213,3 +7191,4 @@ window.activeCategory=activeCategory;
 </script>
 </body>
 </html>
+
