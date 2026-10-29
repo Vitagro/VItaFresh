@@ -6,7 +6,7 @@
 #chat-panel .chat-avatar{background:#ffffff18;border-radius:12px}
 #chat-messages{background:#f4f7f4;max-height:none;min-height:120px;padding:18px;line-height:1.65;overscroll-behavior:contain}
 #chat-panel .chat-bubble{font-size:14px;box-shadow:none;border:1px solid #e0e8e1;line-height:1.65}
-#chat-quickreplies-bar{max-height:132px;overflow:auto;background:#fff!important;padding:12px!important;flex-shrink:0}
+#chat-quickreplies-bar{flex-direction:row;max-height:132px;overflow:auto;background:#fff!important;padding:12px!important;flex-shrink:0}
 #chat-panel .chat-qr{border:1px solid #d6e2d9;color:#234c34;background:#fff;border-radius:9px;padding:9px 11px;font-size:12px;min-height:38px}
 #chat-panel .chat-qr:hover{background:#edf5ef;border-color:#799c84}
 #chat-panel .chat-input-row{padding:12px;background:white;border-top:1px solid #e2e9e3;flex-shrink:0}
