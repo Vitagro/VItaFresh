@@ -875,6 +875,8 @@ html[dir="rtl"] .modal-close{right:auto;left:14px}
 <!-- ═══ EmailJS SDK (envoi d'emails côté client, sans backend) ═══ -->
 <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://shop.vita-agro.com/#organization","name":"Vita Fresh Shop","url":"https://shop.vita-agro.com/","description":"Commandez fruits, légumes et herbes fraîches à Casablanca. Catalogue en ligne pour particuliers, restaurants, hôtels et commerçants. Livraison selon votre zone.","parentOrganization":{"@id":"https://vita-agro.com/#organization","name":"Vita Agro Capital"}},{"@type":"WebSite","@id":"https://shop.vita-agro.com/#website","url":"https://shop.vita-agro.com/","name":"Vita Fresh Shop","inLanguage":"fr-MA","publisher":{"@id":"https://shop.vita-agro.com/#organization"}},{"@type":"WebPage","@id":"https://shop.vita-agro.com/#webpage","url":"https://shop.vita-agro.com/","name":"Vita Fresh Shop : fruits et légumes à Casablanca","description":"Commandez fruits, légumes et herbes fraîches à Casablanca. Catalogue en ligne pour particuliers, restaurants, hôtels et commerçants. Livraison selon votre zone.","inLanguage":"fr-MA","isPartOf":{"@id":"https://shop.vita-agro.com/#website"},"about":{"@id":"https://shop.vita-agro.com/#organization"}}]}</script>
+<link rel="stylesheet" href="/shop-assistant.css">
+<script src="/shop-scenarios.js"></script>
 </head>
 <body>
 
@@ -2954,19 +2956,19 @@ body.anim-paused *,body.anim-paused *::before,body.anim-paused *::after{animatio
   <span id="chat-fab-icon">🤖</span>
   <span id="chat-notif-dot" style="position:absolute;top:4px;right:4px;width:12px;height:12px;background:#ff4444;border-radius:50%;border:2px solid #fff;display:none"></span>
 </button>
-<div id="chat-panel" onclick="event.stopPropagation()">
+<div id="chat-panel" role="region" aria-label="Assistant Vita Fresh" onclick="event.stopPropagation()">
   <div class="chat-header">
     <div class="chat-avatar" style="font-size:22px">🤖</div>
     <div class="chat-header-info">
-      <div class="chat-header-name">Nour ✨ — Assistant IA Vita Fresh</div>
-      <div class="chat-header-status" id="chat-status-txt">● IA Claude · متاح · Powered by AI 24h/24</div>
+      <div class="chat-header-name">Nour · Votre assistant Vita Fresh</div>
+      <div class="chat-header-status" id="chat-status-txt">Catalogue en direct · Conseils & assistance</div>
     </div>
-    <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+    <button class="chat-close-btn" aria-label="Fermer l’assistant" onclick="toggleChat()">✕</button>
   </div>
-  <div class="chat-body" id="chat-messages"></div>
+  <div class="chat-body" id="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
   <div id="chat-quickreplies-bar" class="chat-quickreplies" style="padding:8px 12px;background:#f7f7f7;border-top:1px solid #eee;gap:6px;flex-wrap:wrap;display:flex"></div>
-  <p style="padding:6px 12px;font-size:11px;background:white;color:#555">Votre demande est traitée par Groq. Ne saisissez pas de données personnelles.</p><div class="chat-input-row">
-    <input class="chat-input" id="chat-input" placeholder="Tapez · اكتب · Type..." onkeydown="if(event.key==='Enter')chatSend()"/>
+  <p style="padding:6px 12px;font-size:11px;background:white;color:#555">La recherche de produits utilise Groq. Ne partagez pas de données personnelles ou bancaires.</p><div class="chat-input-row">
+    <input class="chat-input" id="chat-input" maxlength="1000" aria-label="Votre question" placeholder="Tapez · اكتب · Type..." onkeydown="if(event.key==='Enter')chatSend()"/>
     <button class="chat-send-btn" onclick="event.stopPropagation();chatSend()" title="Envoyer">➤</button>
   </div>
 </div>
@@ -6394,7 +6396,7 @@ function chatShowQuickReplies(qrs){
       e.stopPropagation(); bar.innerHTML="";
       chatAddMsg("user", qr.label);
       if(qr.action) chatDoAction(qr.action);
-      else chatAskAI(qr.label);
+      else chatAskAI(qr.question||qr.label);
     };
     bar.appendChild(btn);
   });
@@ -6593,7 +6595,11 @@ function chatBuildReply(userText){
 var shopAiBusy=false;
 function chatAskAI(userText){
   if(shopAiBusy)return;
+  var guide=ShopScenarios.route(userText);
+  if(guide){chatAddMsg("bot",guide.message);chatShowQuickReplies([{label:"Voir le catalogue",action:"catalogue"},{label:"Contacter l’équipe",action:"waDirect"}].concat(ShopScenarios.suggestions.map(function(q){return {label:q[0],question:q[1]};})));return;}
   shopAiBusy=true;
+  var send=document.querySelector(".chat-send-btn");send.disabled=true;
+  document.getElementById("chat-status-txt").textContent="Recherche dans le catalogue…";
   chatShowTyping();
   fetch("/api/ext/shop-assistant",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:userText.slice(0,1000)}),signal:AbortSignal.timeout(35000)})
   .then(async function(r){var d=await r.json();if(!r.ok)throw Error(d.error||"Assistant indisponible");return d;})
@@ -6601,7 +6607,7 @@ function chatAskAI(userText){
     var lines=d.products.map(function(p){return p.nom+" — "+(p.prix==null?"Prix à confirmer":p.prix+" DH / "+p.unite)+" — "+(p.available?"Disponible au catalogue":"Disponibilité à confirmer");});
     chatAddMsg("bot",d.intent!=="products"?"Pour la livraison ou le suivi, contactez notre équipe. Aucun délai n’est confirmé par l’assistant.":lines.length?"Voici une sélection du catalogue :\n\n"+lines.join("\n\n")+"\n\nVérifiez les quantités et le prix final dans le catalogue avant de commander.":"Aucun produit correspondant trouvé. Essayez un nom de produit ou consultez le catalogue.");
   }).catch(function(e){chatAddMsg("bot",e.message||"Assistant indisponible. Consultez le catalogue.");})
-  .finally(function(){shopAiBusy=false;chatRemoveTyping();chatShowQuickReplies([{label:"Catalogue",action:"catalogue"},{label:"Contacter l’équipe",action:"waDirect"}]);});
+  .finally(function(){shopAiBusy=false;send.disabled=false;document.getElementById("chat-status-txt").textContent="Catalogue en direct · Conseils & assistance";chatRemoveTyping();chatShowQuickReplies([{label:"Catalogue",action:"catalogue"},{label:"Contacter l’équipe",action:"waDirect"}]);});
 }
 function chatSend(){
   var input=document.getElementById("chat-input"), text=input.value.trim();
@@ -6626,37 +6632,12 @@ function toggleChat(){
       var l=chatLang();
       var welcome={fr:"Bonjour 👋 Je suis **Nour ✨**, votre assistante IA Vita Fresh.\nComment puis-je vous aider ? Produits, livraison, commandes, tarifs pro — je suis là !",ar:"السلام عليكم 👋 أنا **فيفي ✨**، المساعدة الذكية ديال Vita Fresh.\nكيفاش نقدر نعاونك؟ المنتجات، التوصيل، الطلبيات — أنا هنا!",en:"Hello 👋 I'm **Nour ✨**, your AI assistant at Vita Fresh.\nHow can I help? Products, delivery, orders, pro pricing — I'm here!"};
       chatAddMsg("bot", welcome[l]||welcome.fr);
-      chatShowQuickReplies([
-        {label:"🛒 Commander",action:"catalogue"},
-        {label:"🚚 Infos livraison",action:null,_q:"Quels sont les délais et frais de livraison ?"},
-        {label:"💰 Tarifs pro",action:null,_q:"Quels sont vos tarifs pour les professionnels CHR ?"},
-        {label:"🥦 Produits dispo",action:null,_q:"Quels produits sont disponibles aujourd'hui ?"}
-      ].map(function(qr){
-        if(qr._q){ qr.label=qr.label; delete qr.action; qr._text=qr._q; }
-        return qr;
-      }));
-      // Override button onclick for _text items
-      setTimeout(function(){
-        var bar=document.getElementById("chat-quickreplies-bar");
-        if(!bar) return;
-        var btns=bar.querySelectorAll("button");
-        var quickItems=[
-          {label:"🛒 Commander",action:"catalogue"},
-          {label:"🚚 Infos livraison",text:"Quels sont les délais et frais de livraison ?"},
-          {label:"💰 Tarifs pro",text:"Quels sont vos tarifs pour les professionnels CHR ?"},
-          {label:"🥦 Produits dispo",text:"Quels produits sont disponibles aujourd'hui ?"}
-        ];
-        btns.forEach(function(btn,i){
-          var item=quickItems[i]; if(!item) return;
-          btn.onclick=function(e){
-            e.stopPropagation(); bar.innerHTML="";
-            if(item.action){ chatDoAction(item.action); }
-            else { chatAddMsg("user",item.label); chatAskAI(item.text); }
-          };
-        });
-      },50);
+      chatShowQuickReplies(ShopScenarios.suggestions.map(function(q){return {label:q[0],question:q[1]};}));
     }
   } else panel.classList.remove("open");
+  document.getElementById("chat-fab").setAttribute("aria-expanded",String(chatOpen));
+  if(chatOpen)document.getElementById("chat-input").focus();
+  else document.getElementById("chat-fab").focus();
 }
 
 // Add CSS for typing animation
@@ -6666,7 +6647,7 @@ function toggleChat(){
   document.head.appendChild(s);
 })();
 
-setTimeout(function(){ var dot=document.getElementById("chat-notif-dot"); if(dot&&!chatOpen){ dot.style.display="block"; } }, 4000);
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&chatOpen)toggleChat();});
 
 // Expose globals
 window.filt=filt; window.fcat=fcat; window.setDel=setDel; window.setCt=setCt; window.upCart=upCart; window.applyPromo=applyPromo;
