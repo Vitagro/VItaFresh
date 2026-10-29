@@ -6782,19 +6782,11 @@ window.activeCategory=activeCategory;
     var m = document.getElementById("welcome-modal");
     if(m){ m.classList.remove("show"); document.body.style.overflow=""; }
     try{ sessionStorage.setItem("vc_welcome_seen","1"); }catch(e){}
-    if(action==="login"){
-      // Ouvrir le formulaire de connexion
-      var lf = document.getElementById("login-form");
-      var lm = document.getElementById("login-modal");
-      if(typeof openLogin==="function"){ setTimeout(openLogin, 200); }
-      else if(lm){ setTimeout(function(){ lm.classList.add("show"); }, 200); }
-      else { setTimeout(function(){ document.getElementById("mon-espace") && document.getElementById("mon-espace").scrollIntoView({behavior:"smooth"}); }, 200); }
-    } else if(action==="signup"){
-      // Ouvrir le formulaire d'inscription
-      if(typeof openSignup==="function"){ setTimeout(openSignup, 200); }
-      else {
-        var sm = document.getElementById("signup-modal");
-        if(sm){ setTimeout(function(){ sm.classList.add("show"); }, 200); }
+    if(action){
+      var panel=document.getElementById("chat-panel");
+      if(panel&&!panel.classList.contains("open")) window.toggleChat();
+      if(action==="login"||action==="signup"){
+        window.openLogin();window.switchLoginTab(action==="signup"?"signup":"login");
       }
     }
     // 'ghost' → ne fait rien, l'utilisateur navigue librement
@@ -7038,107 +7030,7 @@ window.activeCategory=activeCategory;
     <div class="vf-lot-terms" id="vf-lot-terms"></div>
   </div>
 </div></div>
-<script>
-(function(){
-  var L={
-    fr:{t:"Tournez la roue 🎡",s:"Débloquez votre récompense Vita Fresh",spin:"TOURNER LA ROUE",scratch:"🪙 Grattez le logo pour découvrir votre gain !",
-        res:function(m,se){return "<span>Vous avez gagné</span><b>"+m+" DH de réduction</b><span style='font-size:12px;opacity:.8'>dès "+se+" DH d'achat</span>";},
-        gift:function(l){return "<span>Vous avez gagné</span><b>"+l+"</b>";},
-        terms:function(se){return "Réduction conditionnée à "+se+" DH d'achat. Non cumulable. Offre limitée.";},
-        none:"Aucune récompense disponible pour le moment."},
-    ar:{t:"دوّر الروى 🎡",s:"فك الجائزة ديالك مع Vita Fresh",spin:"دوّر الروى",scratch:"🪙 حك اللوغو باش تكتاشف الجائزة ديالك!",
-        res:function(m,se){return "<span>ربحتي</span><b>"+m+" درهم تخفيض</b><span style='font-size:12px;opacity:.8'>من "+se+" درهم ديال الشرا</span>";},
-        gift:function(l){return "<span>ربحتي</span><b>"+l+"</b>";},
-        terms:function(se){return "التخفيض خاصو شرا ديال "+se+" درهم. ما كيتجمعش. عرض محدود.";},
-        none:"ما كاينش شي جائزة دابا."},
-    en:{t:"Spin the wheel 🎡",s:"Unlock your Vita Fresh reward",spin:"SPIN THE WHEEL",scratch:"🪙 Scratch the logo to reveal your prize!",
-        res:function(m,se){return "<span>You won</span><b>"+m+" DH off</b><span style='font-size:12px;opacity:.8'>from "+se+" DH spend</span>";},
-        gift:function(l){return "<span>You won</span><b>"+l+"</b>";},
-        terms:function(se){return "Discount requires "+se+" DH spend. Not combinable. Limited offer.";},
-        none:"No reward available right now."}
-  };
-  function lang(){ return (window.currentLang==="ar"||window.currentLang==="en")?window.currentLang:"fr"; }
-  function uid(){ var k="vf_uid",v=localStorage.getItem(k); if(!v){v="web-"+Math.random().toString(36).slice(2,10);localStorage.setItem(k,v);} return v; }
-  function pick(rw){ var tot=rw.reduce(function(s,r){return s+(r.poids||1);},0),x=Math.random()*tot; for(var i=0;i<rw.length;i++){ if((x-=(rw[i].poids||1))<=0) return i; } return 0; }
-  function confetti(){ var c=["#fcd34d","#4ade80","#b8960c","#2d7a46","#fff"]; for(var i=0;i<28;i++){ var d=document.createElement("div"); d.className="vf-confetti"; d.style.left=(Math.random()*100)+"vw"; d.style.top="-20px"; d.style.background=c[i%c.length]; d.style.animation="vfFall "+(1.6+Math.random()*1.4)+"s ease-in "+(Math.random()*0.3)+"s forwards"; document.body.appendChild(d); setTimeout((function(el){return function(){el.remove();};})(d),3300); } }
-
-  var shown=false, seuil=5000;
-  function show(data){
-    if(shown) return; shown=true;
-    var lg=L[lang()], uniq=(data.rewards||[]).slice(0,10); seuil=data.seuilCible||5000;
-    if(!uniq.length) return;
-    document.getElementById("vf-lot-t").textContent=lg.t;
-    document.getElementById("vf-lot-s").textContent=lg.s;
-    var spin=document.getElementById("vf-lot-spin"); spin.textContent=lg.spin;
-    var SLOTS=Math.max(8,uniq.length), slots=[],k; for(k=0;k<SLOTS;k++) slots.push(uniq[k%uniq.length]);
-    var wheel=document.getElementById("vf-wheel"), seg=360/SLOTS;
-    var cols=["#1a4f2a","#b8960c","#2d7a46","#8a6d08","#256b3a","#a07d0a","#1f5e34","#9a7a0a"];
-    wheel.style.background="conic-gradient("+slots.map(function(r,i){return cols[i%cols.length]+" "+(i*seg)+"deg "+((i+1)*seg)+"deg";}).join(",")+")";
-    wheel.innerHTML=slots.map(function(r,i){ var lbl=r.type==="reduction"?(r.montant+" DH"):(r.label||"🎁"); return '<div class="vf-seg" style="transform:rotate('+(i*seg+seg/2)+'deg)"><span>'+lbl+'</span></div>'; }).join("");
-    document.getElementById("vf-lot").classList.add("on");
-
-    spin.onclick=function(){
-      spin.disabled=true;
-      var ri=pick(uniq), r=uniq[ri];
-      var target=360*6-(ri*seg+seg/2)+(Math.random()*seg*0.6-seg*0.3);
-      wheel.style.transform="rotate("+target+"deg)";
-      setTimeout(function(){
-        fetch(CONFIG.API_URL+"/api/ext/loterie",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"claim",segmentId:r.id,userId:uid()})})
-          .then(function(x){return x.json();}).then(function(j){ if(j&&j.ok) startScratch(lg,r,j.coupon||{}); else toScratchText(lg.none); })
-          .catch(function(){ toScratchText(lg.none); });
-      },5100);
-    };
-  }
-
-  function toScratchText(txt){
-    document.getElementById("vf-step-wheel").style.display="none";
-    document.getElementById("vf-step-scratch").style.display="block";
-    document.getElementById("vf-scratch-hint").textContent="";
-    document.getElementById("vf-scratch-prize").innerHTML="<span>"+txt+"</span>";
-    document.getElementById("vf-scratch-canvas").style.display="none";
-  }
-
-  function startScratch(lg,r,coupon){
-    document.getElementById("vf-step-wheel").style.display="none";
-    document.getElementById("vf-step-scratch").style.display="block";
-    document.getElementById("vf-scratch-hint").textContent=lg.scratch;
-    var prizeHtml=(r.type==="reduction"?lg.res(r.montant,seuil):lg.gift(r.label||"🎁"));
-    if(coupon&&coupon.code) prizeHtml+="<span style='font-size:12px;margin-top:4px'>Code : <b style='font-size:14px'>"+coupon.code+"</b></span>";
-    document.getElementById("vf-scratch-prize").innerHTML=prizeHtml;
-    try{localStorage.setItem("vf_loterie_claimed","1");localStorage.setItem("vf_coupon",JSON.stringify(coupon||{}));}catch(e){}
-
-    var cv=document.getElementById("vf-scratch-canvas"); cv.style.display="block";
-    var ctx=cv.getContext("2d"), W=cv.width, H=cv.height;
-    var g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,"#b8960c"); g.addColorStop(.5,"#caa11e"); g.addColorStop(1,"#2d7a46");
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle="rgba(255,255,255,.18)"; ctx.font="bold 15px Inter,Arial"; ctx.textBaseline="middle";
-    for(var y=18;y<H;y+=34){ for(var x=-20+(((y/34)|0)%2?0:60);x<W;x+=130){ ctx.save(); ctx.translate(x,y); ctx.rotate(-.18); ctx.fillText("🍃 VITA FRESH",0,0); ctx.restore(); } }
-    ctx.fillStyle="rgba(255,255,255,.9)"; ctx.font="900 17px Inter,Arial"; ctx.textAlign="center";
-    ctx.fillText("✦ GRATTEZ ICI ✦",W/2,H/2);
-    ctx.globalCompositeOperation="destination-out";
-
-    var drawing=false, done=false, lastChk=0;
-    function pos(e){ var rc=cv.getBoundingClientRect(),t=e.touches?e.touches[0]:e; return {x:(t.clientX-rc.left)*(W/rc.width),y:(t.clientY-rc.top)*(H/rc.height)}; }
-    function checkDone(){ var now=Date.now(); if(now-lastChk<220)return; lastChk=now; try{ var d=ctx.getImageData(0,0,W,H).data,cl=0,tot=0; for(var i=3;i<d.length;i+=160){ tot++; if(d[i]===0)cl++; } if(tot&&cl/tot>0.5){ done=true; ctx.clearRect(0,0,W,H); confetti(); document.getElementById("vf-lot-terms").textContent=lg.terms(seuil); document.getElementById("vf-scratch-hint").textContent="🎉"; } }catch(_){} }
-    function scratch(e){ if(!drawing||done)return; var p=pos(e); ctx.beginPath(); ctx.arc(p.x,p.y,22,0,7); ctx.fill(); checkDone(); if(e.preventDefault)e.preventDefault(); }
-    cv.addEventListener("mousedown",function(e){drawing=true;scratch(e);});
-    cv.addEventListener("mousemove",scratch);
-    window.addEventListener("mouseup",function(){drawing=false;});
-    cv.addEventListener("touchstart",function(e){drawing=true;scratch(e);},{passive:false});
-    cv.addEventListener("touchmove",scratch,{passive:false});
-    cv.addEventListener("touchend",function(){drawing=false;});
-  }
-
-  function init(){
-    if(localStorage.getItem("vf_loterie_claimed")) return;
-    fetch(CONFIG.API_URL+"/api/ext/loterie").then(function(r){return r.json();}).then(function(d){
-      if(d&&d.active&&d.rewards&&d.rewards.length) setTimeout(function(){show(d);},900);
-    }).catch(function(){});
-  }
-  if(document.readyState==="complete"||document.readyState==="interactive") setTimeout(init,1200);
-  else window.addEventListener("DOMContentLoaded",function(){setTimeout(init,1200);});
-})();
-</script>
+<script src="/shop-lottery.js"></script>
 
 <!-- ===== Téléchargement APK FreshLink Pro — protégé par mot de passe ===== -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
