@@ -1,4 +1,12 @@
 /* Service desk: readable, restrained, keyboard and small-screen friendly. */
+#chat-panel.open{height:min(740px,calc(100dvh - 120px))}
+#chat-messages{min-height:0!important;flex:1 1 auto}
+#shop-rewards{display:block;margin:0 auto 24px;padding:14px 24px;border:1px solid #bc9443;border-radius:12px;background:#163e2b;color:white;font:600 16px Inter,Arial;cursor:pointer}
+#shop-rewards[hidden]{display:none}
+#vf-lot .vf-hub,#vf-lot .vf-ptr{display:none}
+#vf-lot .vf-wheel-wrap{width:100%;height:auto}
+#vf-lot .vf-lot-terms{color:#dae6dd;font-size:13px}
+@media(max-width:600px){#chat-panel.open{inset:8px;width:calc(100vw - 16px);height:calc(100dvh - 16px);max-height:none;z-index:1200}#chat-panel .chat-quickreplies{max-height:130px}#chat-panel .chat-input-row{padding-bottom:max(12px,env(safe-area-inset-bottom))}}
 #chat-panel{width:410px;max-width:calc(100vw - 32px);bottom:96px;right:24px;max-height:min(740px,calc(100dvh - 120px));border:1px solid #dae5dd;border-radius:22px;box-shadow:0 16px 64px #143b2433;font-family:Inter,Arial,sans-serif}
 #chat-panel .chat-header{background:#143e2b;padding:18px;gap:12px}
 #chat-panel .chat-header-name{font-size:15px;line-height:1.5}
